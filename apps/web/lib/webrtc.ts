@@ -18,10 +18,26 @@ export type WebRTCCallbacks = {
 
 const ICE_RECONNECT_GRACE_MS = 5_000
 
+// Public free TURN relays (Metered open relay) so calls still connect when a
+// strict NAT blocks direct peer-to-peer. Set NEXT_PUBLIC_TURN_URL /
+// NEXT_PUBLIC_TURN_USERNAME / NEXT_PUBLIC_TURN_CREDENTIAL to use your own.
+const DEFAULT_TURN = process.env.NEXT_PUBLIC_TURN_URL
+  ? { urls: process.env.NEXT_PUBLIC_TURN_URL.split(','), username: process.env.NEXT_PUBLIC_TURN_USERNAME, credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL }
+  : {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    }
+
 const RTC_CONFIG: RTCConfiguration = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    DEFAULT_TURN,
   ],
 }
 
