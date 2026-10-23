@@ -42,9 +42,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@webrtc-conf/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       framer-motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -103,8 +100,6 @@ importers:
       vitest:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.15)(jsdom@25.0.1)
-
-  packages/types: {}
 
 packages:
 
