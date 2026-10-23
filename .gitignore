@@ -23,6 +23,6 @@ dist/
 # local review artifacts (not part of the app)
 webrtc-guide.html
 server.py
-lib/
-feedback/
+/lib/
+/feedback/
 .vercel
