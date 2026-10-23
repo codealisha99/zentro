@@ -12,7 +12,7 @@ import { SignalingClient } from '@/lib/signaling'
 import { PeerConnection } from '@/lib/webrtc'
 import { AudioRecorder } from '@/lib/recording'
 import { transcribeAudio } from '@/lib/groq'
-import type { ConnectionState, TranscriptSegment } from '@webrtc-conf/types'
+import type { ConnectionState, TranscriptSegment } from '@/lib/types'
 import { Video, Copy, Check } from 'lucide-react'
 import { BackgroundVignette } from '@/components/BackgroundVignette'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ConnectionState } from '@webrtc-conf/types'
+import type { ConnectionState } from '@/lib/types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, WifiOff } from 'lucide-react'
 

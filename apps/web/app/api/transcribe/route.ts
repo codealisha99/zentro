@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
-import type { TranscriptSegment } from '@webrtc-conf/types'
+import type { TranscriptSegment } from '@/lib/types'
 
 const GROQ_MAX_FILE_BYTES = 25 * 1024 * 1024
 

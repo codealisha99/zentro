@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import type { TranscriptSegment } from '@webrtc-conf/types'
+import type { TranscriptSegment } from '@/lib/types'
 
 type Props = {
   segments: TranscriptSegment[]

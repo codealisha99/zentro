@@ -10,7 +10,6 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@webrtc-conf/types": "workspace:*",
     "framer-motion": "^12.38.0",
     "groq-sdk": "^0.7.0",
     "lucide-react": "^1.7.0",
