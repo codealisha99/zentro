@@ -1,0 +1,36 @@
+{
+  "name": "@webrtc-conf/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@webrtc-conf/types": "workspace:*",
+    "framer-motion": "^12.38.0",
+    "groq-sdk": "^0.7.0",
+    "lucide-react": "^1.7.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/uuid": "^9.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "autoprefixer": "^10.0.0",
+    "jsdom": "^25.0.0",
+    "postcss": "^8.0.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}
