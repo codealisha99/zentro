@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env*.local
+
+# turbo
+.turbo/
+
+# editors
+.idea/
+.vscode/
+.DS_Store
+
+# local review artifacts (not part of the app)
+webrtc-guide.html
+server.py
+lib/
+feedback/
