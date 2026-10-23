@@ -22,9 +22,7 @@ function getTimeGreeting(): string {
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
-}
-
-export function Lobby({
+}export function Lobby({
   roomId,
   localStream,
   audioMuted,
@@ -73,7 +71,11 @@ export function Lobby({
     setTimeout(() => setCopied(false), 2_000)
   }
 
-  const greeting = getTimeGreeting()
+  const [greeting, setGreeting] = useState('')
+
+  useEffect(() => {
+    setGreeting(getTimeGreeting())
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#0d0d12] flex flex-col items-center justify-center p-6 selection:bg-[var(--accent)]/30">
