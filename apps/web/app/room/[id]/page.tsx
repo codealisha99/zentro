@@ -13,7 +13,8 @@ import { PeerConnection } from '@/lib/webrtc'
 import { AudioRecorder } from '@/lib/recording'
 import { transcribeAudio } from '@/lib/groq'
 import type { ConnectionState, TranscriptSegment } from '@/lib/types'
-import { Video, Copy, Check } from 'lucide-react'
+import { Video, Copy, Check, Download, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { BackgroundVignette } from '@/components/BackgroundVignette'
 
 const SIGNALING_URL = process.env.NEXT_PUBLIC_SIGNALING_URL ?? 'ws://localhost:8080'
@@ -59,6 +60,8 @@ export default function RoomPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
   const [dataChannelOpen, setDataChannelOpen] = useState(false)
+  const [peerAudioOn, setPeerAudioOn] = useState(true)
+  const [peerVideoOn, setPeerVideoOn] = useState(true)
 
   const [participantsOpen, setParticipantsOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -87,6 +90,14 @@ export default function RoomPage() {
   const showToast = useCallback((message: string, durationMs = 4_000) => {
     setToast(message)
     setTimeout(() => setToast(null), durationMs)
+  }, [])
+
+  const currentMediaState = useCallback(() => {
+    const s = localStreamRef.current
+    return {
+      audio: s?.getAudioTracks()[0]?.enabled ?? true,
+      video: s?.getVideoTracks()[0]?.enabled ?? true,
+    }
   }, [])
 
   const endCall = useCallback(() => {
@@ -188,10 +199,15 @@ export default function RoomPage() {
           onDataChannelOpen: () => {
             setDataChannelOpen(true)
             peer.sendName(nameAtJoin)
+            peer.sendState(currentMediaState())
           },
           onPeerName: (name) => {
             setRemoteName(name)
             showToast(`${name} joined`, 3_000)
+          },
+          onPeerState: (state) => {
+            setPeerAudioOn(state.audio)
+            setPeerVideoOn(state.video)
           },
         })
 
@@ -220,6 +236,8 @@ export default function RoomPage() {
       onPeerJoined: () => {
         setPeerJoined(true)
         setConnectionState('connecting')
+        setPeerAudioOn(true)
+        setPeerVideoOn(true)
         showToast('Someone joined the room', 5_000)
       },
       onPeerLeft: () => {
@@ -227,6 +245,8 @@ export default function RoomPage() {
         setPeerJoined(false)
         setDataChannelOpen(false)
         setRemoteName(null)
+        setPeerAudioOn(true)
+        setPeerVideoOn(true)
         setConnectionState('idle')
         showToast('Peer left the call')
       },
@@ -246,7 +266,7 @@ export default function RoomPage() {
       peerRef.current?.close()
       signalingRef.current?.close()
     }
-  }, [phase, roomId, showToast, router])
+  }, [phase, roomId, showToast, router, currentMediaState])
 
   useEffect(() => {
     if (phase !== 'meeting') return
@@ -279,6 +299,7 @@ export default function RoomPage() {
     if (!track) return
     track.enabled = !track.enabled
     setAudioMuted(!track.enabled)
+    peerRef.current?.sendState(currentMediaState())
   }
 
   function handleToggleVideo() {
@@ -287,6 +308,7 @@ export default function RoomPage() {
     if (!track) return
     track.enabled = !track.enabled
     setVideoMuted(!track.enabled)
+    peerRef.current?.sendState(currentMediaState())
   }
 
   async function handleToggleScreenShare() {
@@ -360,6 +382,29 @@ export default function RoomPage() {
     setTimeout(() => setLinkCopied(false), 2_000)
   }
 
+  // Keyboard shortcuts: M mute, V camera, C chat (ignored while typing)
+  useEffect(() => {
+    if (phase !== 'meeting') return
+    function isTypingTarget(el: EventTarget | null) {
+      if (!(el instanceof HTMLElement)) return false
+      return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable
+    }
+    const handler = (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      if (isTypingTarget(e.target)) return
+      if (e.key === 'm' || e.key === 'M') {
+        handleToggleAudio()
+      } else if (e.key === 'v' || e.key === 'V') {
+        handleToggleVideo()
+      } else if (e.key === 'c' || e.key === 'C') {
+        setChatOpen((p) => !p)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
   if (phase === 'lobby') {
     return (
       <Lobby
@@ -404,7 +449,16 @@ export default function RoomPage() {
             </span>
           </div>
 
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            {isRecording && (
+              <span
+                className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-[0.15em]"
+                style={{ background: 'rgba(240,71,95,0.14)', color: 'var(--danger-bright)', border: '1px solid rgba(240,71,95,0.3)' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full rec-blink" style={{ background: 'var(--danger)' }} />
+                REC
+              </span>
+            )}
             <span
               className="text-sm font-mono tabular-nums"
               style={{ color: 'var(--text-muted)' }}
@@ -451,31 +505,41 @@ export default function RoomPage() {
 
         <ConnectionBanner state={connectionState} />
 
-        {toast && (
-          <div
-            className="fixed top-16 left-1/2 -translate-x-1/2 text-sm px-4 py-2 rounded-full shadow-xl backdrop-blur-md z-50 font-medium flex items-center gap-2"
-            style={{
-              background: 'rgba(26,29,46,0.9)',
-              border: '1px solid var(--border-bright)',
-              color: 'var(--text-primary)',
-            }}
-          >
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span
-                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                style={{ background: 'var(--accent-bright)' }}
-              />
-              <span
-                className="relative inline-flex rounded-full h-2 w-2"
-                style={{ background: 'var(--accent)' }}
-              />
-            </span>
-            {toast}
-          </div>
-        )}
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: -14, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="fixed top-16 left-1/2 -translate-x-1/2 text-sm px-4 py-2.5 rounded-full z-50 font-medium flex items-center gap-2.5"
+              style={{
+                background: 'rgba(18,20,31,0.94)',
+                border: '1px solid var(--border-bright)',
+                color: 'var(--text-primary)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: 'var(--shadow-lg)',
+              }}
+              role="status"
+              aria-live="polite"
+            >
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70"
+                  style={{ background: 'var(--accent-bright)' }}
+                />
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ background: 'var(--accent-bright)' }}
+                />
+              </span>
+              {toast}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Full-bleed layout: video fills all space, controls float over it */}
-        <div className="flex-1 flex min-h-0 overflow-hidden">
+        <div className="flex-1 flex min-h-0 overflow-hidden relative">
 
           {/* ── Video pane ─────────────────────────────────────────────── */}
           <div className="flex-1 relative min-h-0 min-w-0">
@@ -489,37 +553,63 @@ export default function RoomPage() {
                 localName={localName}
                 remoteName={remoteName}
                 localIsScreenSharing={isScreenSharing}
+                remoteAudioMuted={!peerAudioOn}
+                remoteVideoOff={!peerVideoOn}
               />
             </div>
 
             {/* Recording panel — floats above the controls bar */}
             {recordingBlob && !isRecording && (
-              <div
-                className="absolute left-4 right-4 z-20 space-y-3 backdrop-blur-xl p-4 rounded-[var(--radius-xl)]"
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="absolute left-4 right-4 z-20 space-y-3 p-4 rounded-[var(--radius-lg)]"
                 style={{
                   bottom: '88px',
-                  background: 'rgba(13,13,18,0.82)',
-                  border: '1px solid var(--border)',
+                  background: 'rgba(18,20,31,0.88)',
+                  backdropFilter: 'blur(24px) saturate(1.3)',
+                  border: '1px solid var(--border-bright)',
+                  boxShadow: 'var(--shadow-lg)',
                 }}
               >
                 <div className="flex items-center gap-3">
+                  {/* Recording label */}
+                  <span
+                    className="hidden sm:flex items-center gap-1.5 shrink-0 text-[10px] font-semibold uppercase tracking-[0.15em] px-2 py-1 rounded-full"
+                    style={{ background: 'rgba(240,71,95,0.12)', color: 'var(--danger-bright)' }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full rec-blink" style={{ background: 'var(--danger)' }} />
+                    Rec
+                  </span>
                   <audio
                     ref={replayRef}
                     src={recordingBlobUrl ?? undefined}
                     controls
                     onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-                    className="flex-1 h-10"
+                    className="flex-1 h-10 min-w-0"
                   />
                   {segments.length === 0 && (
                     <button
                       onClick={handleTranscribe}
                       disabled={isTranscribing}
-                      className="px-4 py-2 text-sm font-medium rounded-[var(--radius-md)] disabled:opacity-50 transition-colors text-white shrink-0"
+                      className="px-4 py-2 text-sm font-semibold rounded-[var(--radius-md)] disabled:opacity-50 transition-colors text-white shrink-0 flex items-center gap-2"
                       style={{ background: 'var(--accent)' }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-bright)' }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent)' }}
                     >
-                      {isTranscribing ? 'Transcribing...' : 'Transcribe'}
+                      {isTranscribing ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Transcribing…
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-3.5 h-3.5" />
+                          Transcribe
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
@@ -528,7 +618,7 @@ export default function RoomPage() {
                   currentTime={currentTime}
                   isLoading={isTranscribing}
                 />
-              </div>
+              </motion.div>
             )}
 
             {/* Controls float at the bottom center */}
@@ -560,56 +650,72 @@ export default function RoomPage() {
           {/* ── Side panels ────────────────────────────────────────────── */}
           {chatOpen && (
             <div
-              className="w-80 shrink-0 flex flex-col overflow-hidden"
+              className="w-80 shrink-0 flex flex-col overflow-hidden max-md:absolute max-md:inset-y-0 max-md:right-0 max-md:z-30 max-md:w-full max-md:shadow-2xl"
               style={{ borderLeft: '1px solid var(--border)', background: 'rgba(13,13,18,0.96)' }}
             >
               <div
                 className="px-5 py-4 flex items-center justify-between shrink-0"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
               >
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                    In-call messages
-                  </h3>
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      dataChannelOpen ? 'bg-green-400' : 'bg-amber-400 animate-pulse'
-                    }`}
-                    title={dataChannelOpen ? 'Connected' : 'Connecting…'}
-                  />
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-7 h-7 rounded-[var(--radius-sm)] flex items-center justify-center"
+                    style={{ background: 'var(--accent-soft)', border: '1px solid rgba(155,123,255,0.22)' }}
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="var(--accent-bright)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>
+                      In-call messages
+                    </h3>
+                    <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          dataChannelOpen ? 'bg-green-400' : 'bg-amber-400 animate-pulse'
+                        }`}
+                      />
+                      {dataChannelOpen ? 'Encrypted, peer-to-peer' : 'Waiting for peer connection…'}
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setChatOpen(false)}
-                  className="text-xs transition-colors"
+                  className="text-xs transition-colors rounded-md p-1"
                   style={{ color: 'var(--text-muted)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)' }}
+                  aria-label="Close chat"
                 >
-                  Close
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
 
-              {!dataChannelOpen && (
-                <div
-                  className="px-5 py-2.5 shrink-0"
-                  style={{
-                    background: 'rgba(245,158,11,0.06)',
-                    borderBottom: '1px solid rgba(245,158,11,0.12)',
-                  }}
-                >
-                  <p className="text-xs text-amber-400/70">Waiting for peer connection…</p>
-                </div>
-              )}
-
               <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 min-h-0">
                 {messages.length === 0 && (
-                  <p className="text-xs text-center m-auto" style={{ color: 'var(--text-muted)' }}>
-                    No messages yet
-                  </p>
+                  <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-4" style={{ color: 'var(--text-muted)' }}>
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{ background: 'var(--accent-soft)', border: '1px solid rgba(155,123,255,0.2)' }}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="var(--accent-bright)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-xs leading-relaxed max-w-40">
+                      No messages yet. Say hello! 👋
+                    </p>
+                  </div>
                 )}
                 {messages.map((m, i) => (
-                  <div
+                  <motion.div
                     key={i}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
                     className={`flex flex-col max-w-[85%] ${
                       m.sender === 'me' ? 'self-end items-end' : 'self-start items-start'
                     }`}
@@ -618,18 +724,22 @@ export default function RoomPage() {
                       {m.sender === 'me' ? (localName || 'You') : (remoteName ?? 'Peer')}
                     </span>
                     <div
-                      className={`px-4 py-2.5 rounded-2xl text-[13px] ${
+                      className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed ${
                         m.sender === 'me' ? 'rounded-tr-sm' : 'rounded-tl-sm'
                       }`}
                       style={
                         m.sender === 'me'
-                          ? { background: 'var(--accent)', color: '#fff' }
-                          : { background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)' }
+                          ? {
+                              background: 'linear-gradient(135deg, var(--accent), var(--accent-deep))',
+                              color: '#fff',
+                              boxShadow: '0 4px 16px -6px var(--accent-glow)',
+                            }
+                          : { background: 'rgba(255,255,255,0.07)', color: 'var(--text-primary)', border: '1px solid var(--border)' }
                       }
                     >
                       {m.text}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
@@ -670,18 +780,20 @@ export default function RoomPage() {
 
           {participantsOpen && (
             <div
-              className="w-72 shrink-0 overflow-y-auto"
+              className="w-72 shrink-0 overflow-y-auto max-md:absolute max-md:inset-y-0 max-md:right-0 max-md:z-30 max-md:w-full max-md:shadow-2xl"
               style={{ borderLeft: '1px solid var(--border)', background: 'rgba(13,13,18,0.96)' }}
             >
-              <Participants
-                localName={localName}
-                remoteName={remoteName}
-                audioMuted={audioMuted}
-                videoMuted={videoMuted}
-                isScreenSharing={isScreenSharing}
-                peerJoined={peerJoined}
-                onClose={() => setParticipantsOpen(false)}
-              />
+                <Participants
+                  localName={localName}
+                  remoteName={remoteName}
+                  audioMuted={audioMuted}
+                  videoMuted={videoMuted}
+                  isScreenSharing={isScreenSharing}
+                  peerJoined={peerJoined}
+                  remoteAudioMuted={!peerAudioOn}
+                  remoteVideoOff={!peerVideoOn}
+                  onClose={() => setParticipantsOpen(false)}
+                />
             </div>
           )}
         </div>

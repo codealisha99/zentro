@@ -6,6 +6,9 @@ export type { ConnectionState }
 type DataMessage =
   | { type: 'chat'; text: string }
   | { type: 'name'; value: string }
+  | { type: 'state'; audio?: boolean; video?: boolean }
+
+export type PeerMediaState = { audio: boolean; video: boolean }
 
 export type WebRTCCallbacks = {
   onRemoteStream: (stream: MediaStream) => void
@@ -14,6 +17,7 @@ export type WebRTCCallbacks = {
   onMessage?: (message: string) => void
   onDataChannelOpen?: () => void
   onPeerName?: (name: string) => void
+  onPeerState?: (state: PeerMediaState) => void
 }
 
 const ICE_RECONNECT_GRACE_MS = 5_000
@@ -101,6 +105,8 @@ export class PeerConnection {
           this.callbacks.onMessage?.(msg.text)
         } else if (msg.type === 'name') {
           this.callbacks.onPeerName?.(msg.value)
+        } else if (msg.type === 'state') {
+          this.callbacks.onPeerState?.({ audio: msg.audio !== false, video: msg.video !== false })
         }
       } catch {
         this.callbacks.onMessage?.(event.data as string)
@@ -260,6 +266,10 @@ export class PeerConnection {
 
   sendName(name: string): void {
     this.sendData({ type: 'name', value: name })
+  }
+
+  sendState(state: PeerMediaState): void {
+    this.sendData({ type: 'state', ...state })
   }
 
   isDataChannelOpen(): boolean {
