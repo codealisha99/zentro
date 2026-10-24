@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -41,6 +41,16 @@ export default function Home() {
   const [joinValue, setJoinValue] = useState('')
   const [newRoomId, setNewRoomId] = useState<string | null>(null)
   const [copied,   setCopied]    = useState(false)
+  const [loadStage, setLoadStage] = useState(0)
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setLoadStage(1), 100),
+      setTimeout(() => setLoadStage(2), 280),
+      setTimeout(() => setLoadStage(3), 480),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   function createRoom() {
     setNewRoomId(uuidv4())
@@ -71,9 +81,15 @@ export default function Home() {
     >
       <BackgroundVignette />
 
+      <div className="pointer-events-none absolute inset-x-0 top-14 h-[760px] overflow-hidden" aria-hidden="true">
+        <div className="hero-orbit absolute left-[56%] top-16 h-[540px] w-[540px] rounded-full border border-[rgba(139,92,246,0.12)]" />
+        <div className="hero-orbit hero-orbit-delayed absolute left-[56%] top-28 h-[420px] w-[420px] rounded-full border border-[rgba(139,92,246,0.1)]" />
+        <div className="absolute left-[58%] top-36 h-[360px] w-[360px] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.17),transparent_68%)] blur-2xl" />
+      </div>
+
       {/* ── Nav ─────────────────────────────────────────────────── */}
       <nav
-        className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-6 md:px-10"
+        className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-5 md:px-10"
         style={{
           background: 'rgba(13,13,18,0.85)',
           backdropFilter: 'blur(20px)',
@@ -125,15 +141,15 @@ export default function Home() {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <div className="min-h-screen flex items-center pt-14">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-10 py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
+      <div className="relative min-h-screen flex items-center pt-16">
+        <div className="w-full max-w-7xl mx-auto px-5 md:px-10 py-20 lg:py-24 grid grid-cols-1 lg:grid-cols-[0.92fr_1.08fr] gap-12 xl:gap-16 items-center">
 
           {/* Left: copy + CTA */}
           <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.65, ease: 'easeOut' }}
-            className="space-y-8"
+            initial={false}
+            animate={loadStage >= 1 ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="relative z-10 space-y-8"
           >
             {/* Status badge */}
             <div
@@ -145,25 +161,24 @@ export default function Home() {
               }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
-              No sign up · No servers · Peer-to-peer
+              No account · Direct connection · Just talk
             </div>
 
             {/* Headline */}
             <div className="space-y-4">
               <h1
-                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]"
+                className="text-5xl md:text-6xl xl:text-7xl font-bold tracking-[-0.055em] leading-[0.98]"
                 style={{ color: 'var(--text-primary)' }}
               >
-                Video calls that
+                Face to face.
                 <br />
-                <span style={{ color: 'var(--accent-bright)' }}>just work.</span>
+                <span className="hero-gradient-text">No fuss.</span>
               </h1>
               <p
                 className="text-base md:text-lg leading-relaxed max-w-md"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                Instant peer-to-peer video. Share a link, your contact joins.
-                No downloads, no accounts, no friction.
+                A great conversation shouldn’t start with an account setup. Make a room, send one link, and get straight to the good part.
               </p>
             </div>
 
@@ -320,9 +335,9 @@ export default function Home() {
 
           {/* Right: Video call preview */}
           <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.65, ease: 'easeOut', delay: 0.15 }}
+            initial={false}
+            animate={loadStage >= 2 ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: 20, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
             className="relative hidden lg:flex items-center justify-center"
           >
             <VideoPreview />
@@ -331,17 +346,30 @@ export default function Home() {
       </div>
 
       {/* ── Features ────────────────────────────────────────────── */}
-      <section className="relative z-10 pb-24">
-        <div className="max-w-7xl mx-auto px-6 md:px-10">
+      <section className="relative z-10 pb-28">
+        <div className="max-w-7xl mx-auto px-5 md:px-10">
+          <motion.div
+            initial={false}
+            animate={loadStage >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="mb-7 flex items-end justify-between gap-6 border-b pb-5"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--accent-bright)' }}>A better way to meet</p>
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Everything you need. Nothing in the way.</h2>
+            </div>
+            <span className="hidden sm:block text-xs" style={{ color: 'var(--text-muted)' }}>Made for actual conversations</span>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {FEATURES.map(({ Icon, title, desc }, i) => (
               <motion.div
                 key={title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.45, delay: i * 0.1 }}
-                className="p-6 rounded-[var(--radius-xl)]"
+                initial={false}
+                animate={loadStage >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30, delay: i * 0.08 }}
+                whileHover={{ y: -4 }}
+                className="feature-card p-6 md:p-7 rounded-[var(--radius-xl)]"
                 style={{
                   background: 'rgba(19,21,32,0.65)',
                   border: '1px solid var(--border)',
@@ -389,17 +417,17 @@ export default function Home() {
 /* ─── Video call preview mockup (hero right column) ──────────────── */
 function VideoPreview() {
   return (
-    <div className="relative w-full max-w-[520px]">
+    <div className="relative w-full max-w-[600px] py-8 sm:px-4">
       {/* Ambient glow */}
       <div
-        className="absolute inset-8 rounded-[var(--radius-xl)] pointer-events-none"
-        style={{ background: 'rgba(124,58,237,0.1)', filter: 'blur(48px)' }}
+        className="absolute inset-12 rounded-[var(--radius-xl)] pointer-events-none"
+        style={{ background: 'rgba(124,58,237,0.12)', filter: 'blur(64px)' }}
       />
 
       {/* Main call window */}
       <div
         className="gradient-border relative rounded-[var(--radius-xl)] overflow-hidden shadow-2xl"
-        style={{ background: '#080810', aspectRatio: '16/11' }}
+        style={{ background: '#080810', aspectRatio: '16/10' }}
       >
         {/* Remote video placeholder — subtle gradient */}
         <div
