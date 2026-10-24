@@ -488,6 +488,7 @@ export default function RoomPage() {
                 peerJoined={peerJoined}
                 localName={localName}
                 remoteName={remoteName}
+                localIsScreenSharing={isScreenSharing}
               />
             </div>
 
