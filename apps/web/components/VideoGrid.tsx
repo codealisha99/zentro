@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { User } from 'lucide-react'
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
   peerJoined?: boolean
   localName?: string
   remoteName?: string | null
+  localIsScreenSharing?: boolean
 }
 
 export function VideoGrid({
@@ -18,8 +19,10 @@ export function VideoGrid({
   peerJoined = false,
   localName,
   remoteName,
+  localIsScreenSharing = false,
 }: Props) {
   const localRef = useRef<HTMLVideoElement>(null)
+  const shouldReduceMotion = useReducedMotion()
 
   // Local stream never unmounts so a plain useEffect is fine.
   useEffect(() => {
@@ -48,6 +51,7 @@ export function VideoGrid({
   )
 
   const hasRemote = !!remoteStream
+  const showLocalPreview = peerJoined || hasRemote || localIsScreenSharing
 
   return (
     <div
@@ -129,17 +133,16 @@ export function VideoGrid({
         )}
       </AnimatePresence>
 
-      {/* PIP / solo local video */}
+      {/* The local preview becomes a corner tile during a call or screen share. */}
       <motion.div
-        layout
+        layout={!shouldReduceMotion}
         initial={false}
-        animate={
-          hasRemote
-            ? { width: 160, height: 120, bottom: 24, right: 24, borderRadius: 12 }
-            : { width: '100%', height: '100%', bottom: 0, right: 0, borderRadius: 22 }
-        }
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="gradient-border absolute overflow-hidden shadow-2xl z-10"
+        transition={{ layout: { type: 'spring', stiffness: 300, damping: 30 } }}
+        className={`gradient-border absolute overflow-hidden shadow-2xl z-10 motion-safe:transition-[width,height,border-radius] motion-safe:duration-300 motion-safe:ease-in-out ${
+          showLocalPreview
+            ? `right-3 sm:right-5 ${localIsScreenSharing ? 'top-3 sm:top-5' : 'bottom-24 sm:bottom-5'} w-[clamp(8rem,22vw,18rem)] aspect-video rounded-[var(--radius-md)]`
+            : 'inset-0 rounded-[var(--radius-xl)]'
+        }`}
         style={{ background: 'var(--surface)' }}
       >
         <video
@@ -147,7 +150,7 @@ export function VideoGrid({
           autoPlay
           playsInline
           muted
-          className="w-full h-full object-cover scale-x-[-1]"
+          className={`w-full h-full ${localIsScreenSharing ? 'object-contain' : 'object-cover scale-x-[-1]'}`}
         />
         {!localStream && (
           <div
@@ -157,7 +160,7 @@ export function VideoGrid({
             No camera
           </div>
         )}
-        {localName && hasRemote && (
+        {localName && showLocalPreview && (
           <div
             className="absolute bottom-1.5 left-1.5 text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-sm)] leading-tight"
             style={{
@@ -170,7 +173,7 @@ export function VideoGrid({
             {localName} (You)
           </div>
         )}
-        {localName && !hasRemote && (
+        {localName && !showLocalPreview && (
           <div
             className="absolute bottom-4 left-4 text-xs font-medium px-2.5 py-1 rounded-[var(--radius-sm)]"
             style={{
