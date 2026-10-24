@@ -55,3 +55,54 @@ body::before {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+.hero-gradient-text {
+  color: var(--accent-bright);
+  background: linear-gradient(105deg, #c4b5fd 5%, #8b5cf6 48%, #d8b4fe 88%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-orbit {
+  transform-origin: center;
+  animation: orbit-drift 24s ease-in-out infinite alternate;
+}
+
+.hero-orbit-delayed {
+  animation-delay: -12s;
+  animation-duration: 30s;
+}
+
+.feature-card {
+  transition: border-color 180ms ease-out, background-color 180ms ease-out;
+}
+
+.feature-card:hover {
+  border-color: var(--border-bright) !important;
+  background: rgba(26, 29, 46, 0.82) !important;
+}
+
+@keyframes orbit-drift {
+  from { transform: rotate(-8deg) scale(0.97); }
+  to { transform: rotate(8deg) scale(1.03); }
+}
+
+@media (max-width: 1023px) {
+  .hero-orbit,
+  .hero-orbit-delayed {
+    left: 30%;
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-orbit,
+  .hero-orbit-delayed {
+    animation: none;
+  }
+
+  .feature-card {
+    transition: none;
+  }
+}
