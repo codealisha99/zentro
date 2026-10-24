@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import {
   Mic, MicOff, Video, VideoOff,
   CircleDot, Square, PhoneOff,
@@ -54,8 +53,12 @@ export function Controls({
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="gradient-border flex items-center gap-2 px-5 py-3 backdrop-blur-xl shadow-2xl rounded-[var(--radius-xl)]"
-        style={{ background: 'rgba(19,21,32,0.85)' }}
+        className="gradient-border flex items-center gap-1.5 px-4 py-2.5 rounded-[var(--radius-lg)]"
+        style={{
+          background: 'rgba(18,20,31,0.88)',
+          backdropFilter: 'blur(24px) saturate(1.35)',
+          boxShadow: 'var(--shadow-lg)',
+        }}
       >
         {/* Audio / Video */}
         <ControlButton
@@ -75,10 +78,7 @@ export function Controls({
           danger={videoMuted && !isScreenSharing}
         />
 
-        <div
-          className="w-px h-5 mx-1"
-          style={{ background: 'var(--border-bright)' }}
-        />
+        <Divider />
 
         {/* Screen share / Chat / Participants / Fullscreen */}
         <ControlButton
@@ -87,6 +87,7 @@ export function Controls({
           active={isScreenSharing}
           label={isScreenSharing ? 'Stop sharing' : 'Share screen'}
           icon={isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <MonitorUp className="w-5 h-5" />}
+          accent={isScreenSharing}
         />
         <ControlButton
           onClick={onToggleChat}
@@ -94,6 +95,7 @@ export function Controls({
           active={chatOpen}
           label="Chat"
           icon={<MessageSquare className="w-5 h-5" />}
+          accent={chatOpen}
         />
         <ControlButton
           onClick={onToggleParticipants}
@@ -105,12 +107,16 @@ export function Controls({
               <Users className="w-5 h-5" />
               <span
                 className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full text-[9px] flex items-center justify-center text-white font-bold px-0.5"
-                style={{ background: 'var(--accent)' }}
+                style={{
+                  background: participantsOpen ? 'var(--accent-deep)' : 'var(--accent)',
+                  boxShadow: '0 0 8px -1px var(--accent-glow)',
+                }}
               >
                 {participantCount}
               </span>
             </div>
           }
+          accent={participantsOpen}
         />
         <ControlButton
           onClick={onToggleFullscreen}
@@ -118,12 +124,10 @@ export function Controls({
           active={isFullscreen}
           label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           icon={isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+          accent={isFullscreen}
         />
 
-        <div
-          className="w-px h-5 mx-1"
-          style={{ background: 'var(--border-bright)' }}
-        />
+        <Divider />
 
         {/* Record */}
         <ControlButton
@@ -131,31 +135,51 @@ export function Controls({
           disabled={disabled}
           active={isRecording}
           label={isRecording ? 'Stop recording' : 'Record'}
-          icon={isRecording ? <Square className="w-5 h-5 fill-current" /> : <CircleDot className="w-5 h-5" />}
+          icon={
+            isRecording ? (
+              <div className="flex items-center">
+                <span className="w-2 h-2 rounded-full rec-blink shrink-0" style={{ background: '#fbbf24' }} />
+                <Square className="w-4 h-4 fill-current ml-2" />
+              </div>
+            ) : (
+              <CircleDot className="w-5 h-5" />
+            )
+          }
           variant={isRecording ? 'recording' : 'default'}
         />
 
-        <div
-          className="w-px h-5 mx-1"
-          style={{ background: 'var(--border-bright)' }}
-        />
+        <Divider />
 
         {/* End call */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.93 }}
           onClick={onEndCall}
-          className="flex items-center justify-center w-11 h-11 text-white transition-all group rounded-[var(--radius-md)]"
+          className="flex items-center justify-center w-11 h-11 text-white rounded-[var(--radius-md)]"
           style={{
             background: 'var(--danger)',
-            boxShadow: '0 0 20px -6px var(--danger-glow)',
+            boxShadow: '0 0 22px -5px var(--danger-glow)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = '#f87171' }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--danger)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--danger-bright)' }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--danger)' }}
           title="End Call"
+          aria-label="End call"
         >
-          <PhoneOff className="w-5 h-5 group-hover:scale-110 transition-transform" />
-        </button>
+          <PhoneOff className="w-5 h-5" />
+        </motion.button>
       </motion.div>
     </div>
+  )
+}
+
+function Divider() {
+  return (
+    <div
+      className="w-px h-5 mx-1.5 shrink-0"
+      style={{
+        background: 'linear-gradient(to bottom, transparent, var(--border-bright), transparent)',
+      }}
+    />
   )
 }
 
@@ -167,6 +191,7 @@ type ButtonProps = {
   icon: React.ReactNode
   variant?: 'default' | 'recording'
   danger?: boolean
+  accent?: boolean
 }
 
 function ControlButton({
@@ -177,63 +202,70 @@ function ControlButton({
   icon,
   variant = 'default',
   danger = false,
+  accent = false,
 }: ButtonProps) {
-  const [isHovered, setIsHovered] = useState(false)
-
   function getStyle(): React.CSSProperties {
     if (variant === 'recording') {
       return {
-        background: 'rgba(245,158,11,0.15)',
-        border: '1px solid rgba(245,158,11,0.25)',
+        background: 'rgba(251,191,36,0.12)',
+        border: '1px solid rgba(251,191,36,0.28)',
         color: '#fbbf24',
       }
     }
     if (danger) {
       return {
-        background: 'rgba(239,68,68,0.15)',
-        border: '1px solid rgba(239,68,68,0.25)',
-        color: '#f87171',
+        background: 'rgba(240,71,95,0.12)',
+        border: '1px solid rgba(240,71,95,0.28)',
+        color: 'var(--danger-bright)',
       }
     }
-    if (active) {
+    if (accent) {
       return {
-        background: 'var(--surface-raised)',
-        border: '1px solid var(--border-bright)',
-        color: 'var(--text-primary)',
+        background: 'var(--accent-soft)',
+        border: '1px solid rgba(155,123,255,0.32)',
+        color: 'var(--accent-bright)',
       }
     }
     return {
-      background: 'var(--surface-raised)',
-      border: '1px solid var(--border-bright)',
-      color: 'var(--text-secondary)',
+      background: active ? 'var(--surface-hover)' : 'transparent',
+      border: '1px solid transparent',
+      color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
     }
   }
 
   return (
     <div className="relative group flex justify-center">
-      <button
+      <motion.button
+        whileTap={{ scale: 0.92 }}
         onClick={onClick}
         disabled={disabled}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className="relative flex items-center justify-center w-11 h-11 rounded-[var(--radius-md)] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="relative flex items-center justify-center w-11 h-11 rounded-[var(--radius-md)] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
         style={getStyle()}
+        onMouseEnter={(e) => {
+          if (disabled || variant !== 'default' || danger || accent) return
+          e.currentTarget.style.background = 'var(--surface-hover)'
+          e.currentTarget.style.color = 'var(--text-primary)'
+        }}
+        onMouseLeave={(e) => {
+          if (disabled || variant !== 'default' || danger || accent) return
+          e.currentTarget.style.background = active ? 'var(--surface-hover)' : 'transparent'
+          e.currentTarget.style.color = active ? 'var(--text-primary)' : 'var(--text-secondary)'
+        }}
         aria-label={label}
+        aria-pressed={active}
       >
-        <motion.div
-          animate={{ scale: isHovered && !disabled ? 1.1 : 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-        >
-          {icon}
-        </motion.div>
-      </button>
+        {icon}
+      </motion.button>
 
+      {/* Tooltip */}
       <div
-        className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded-[var(--radius-sm)] shadow-lg whitespace-nowrap pointer-events-none z-50"
+        role="tooltip"
+        className="absolute -top-9 opacity-0 translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150 text-[11px] font-medium px-2.5 py-1.5 rounded-md whitespace-nowrap pointer-events-none z-50"
         style={{
-          background: 'var(--surface-raised)',
-          border: '1px solid var(--border)',
-          color: 'var(--text-secondary)',
+          background: 'rgba(30,33,48,0.98)',
+          border: '1px solid var(--border-bright)',
+          color: 'var(--text-primary)',
+          boxShadow: 'var(--shadow-md)',
         }}
       >
         {label}

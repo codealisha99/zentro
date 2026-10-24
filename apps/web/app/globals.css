@@ -2,40 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #0d0d12;
-  --surface: #131520;
-  --surface-raised: #1a1d2e;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-bright: rgba(255, 255, 255, 0.14);
-  --accent: #7c3aed;
-  --accent-bright: #8b5cf6;
-  --accent-glow: rgba(124, 58, 237, 0.35);
-  --danger: #ef4444;
-  --danger-glow: rgba(239, 68, 68, 0.35);
-  --text-primary: #f0f0f8;
-  --text-secondary: rgba(240, 240, 248, 0.6);
-  --text-muted: rgba(240, 240, 248, 0.35);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
+/* Anchor targets clear the sticky nav */
+section[id] {
+  scroll-margin-top: 88px;
+}
+
+:root {
+  --bg: #0a0a10;
+  --bg-elevated: #0e0e16;
+  --surface: #12141f;
+  --surface-raised: #191c2b;
+  --surface-hover: #1f2335;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-bright: rgba(255, 255, 255, 0.16);
+
+  --accent: #7c5cfc;
+  --accent-bright: #9b7bff;
+  --accent-deep: #6446e8;
+  --accent-glow: rgba(124, 92, 252, 0.4);
+  --accent-soft: rgba(124, 92, 252, 0.14);
+
+  --danger: #f0475f;
+  --danger-bright: #ff6b80;
+  --danger-glow: rgba(240, 71, 95, 0.35);
+  --success: #34d399;
+  --warning: #fbbf24;
+
+  --text-primary: #f2f2fa;
+  --text-secondary: rgba(242, 242, 250, 0.64);
+  --text-muted: rgba(242, 242, 250, 0.38);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --ring: rgba(155, 123, 255, 0.55);
+  --ring-offset: #0a0a10;
+
+  --shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px -8px rgba(0, 0, 0, 0.5), 0 4px 12px -4px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 24px 64px -12px rgba(0, 0, 0, 0.55), 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 0 1px rgba(124, 92, 252, 0.06), 0 8px 40px -6px rgba(124, 92, 252, 0.22);
+}
+
+/* ── Global focus ring — keyboard users always see where they are ── */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring-offset), 0 0 0 4px var(--ring);
+  border-radius: var(--radius-sm);
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  background-clip: padding-box;
+}
+
+/* ── Film-grain noise overlay ── */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.028;
+  opacity: 0.03;
   pointer-events: none;
   z-index: 9999;
 }
 
+/* ── Slim scrollbars ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.22); }
+* { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.14) transparent; }
+
+/* ── Gradient border (1px, masked) ── */
 .gradient-border {
   position: relative;
 }
-
 .gradient-border::before {
   content: '';
   position: absolute;
@@ -44,9 +100,9 @@ body::before {
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(124, 58, 237, 0.45),
-    rgba(255, 255, 255, 0.08),
-    rgba(124, 58, 237, 0.18)
+    rgba(155, 123, 255, 0.5),
+    rgba(255, 255, 255, 0.1) 42%,
+    rgba(155, 123, 255, 0.2)
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -54,54 +110,163 @@ body::before {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+  z-index: 1;
 }
 
+/* ── Hero accent text ── */
 .hero-gradient-text {
-  color: var(--accent-bright);
-  background: linear-gradient(105deg, #c4b5fd 5%, #8b5cf6 48%, #d8b4fe 88%);
+  background: linear-gradient(100deg, #d0c4ff 0%, #9b7bff 40%, #e2b4ff 75%, #9b7bff 100%);
+  background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: gradient-pan 8s ease-in-out infinite alternate;
 }
 
+@keyframes gradient-pan {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+/* ── Aurora blob drift (landing background) ── */
+.aurora {
+  transform-origin: center;
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.aurora-delayed { animation-delay: -13s; animation-duration: 32s; }
+
+@keyframes aurora-drift {
+  from { transform: translate(0, 0) rotate(-6deg) scale(1); }
+  50%  { transform: translate(3%, -2%) rotate(4deg) scale(1.06); }
+  to   { transform: translate(-2%, 3%) rotate(8deg) scale(0.97); }
+}
+
+/* ── Hero orbit rings ── */
 .hero-orbit {
   transform-origin: center;
   animation: orbit-drift 24s ease-in-out infinite alternate;
 }
-
 .hero-orbit-delayed {
   animation-delay: -12s;
   animation-duration: 30s;
 }
-
-.feature-card {
-  transition: border-color 180ms ease-out, background-color 180ms ease-out;
-}
-
-.feature-card:hover {
-  border-color: var(--border-bright) !important;
-  background: rgba(26, 29, 46, 0.82) !important;
-}
-
 @keyframes orbit-drift {
   from { transform: rotate(-8deg) scale(0.97); }
   to { transform: rotate(8deg) scale(1.03); }
 }
 
+/* ── Feature cards ── */
+.feature-card {
+  transition:
+    border-color 200ms ease-out,
+    background-color 200ms ease-out,
+    box-shadow 200ms ease-out,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.feature-card:hover {
+  border-color: rgba(155, 123, 255, 0.28);
+  background: rgba(25, 28, 43, 0.85);
+  box-shadow: 0 12px 32px -12px rgba(124, 92, 252, 0.18);
+}
+
+/* ── Primary CTA shine sweep ── */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.cta-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -80%;
+  width: 60%;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 80%
+  );
+  transform: skewX(-18deg);
+  animation: shine-sweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shine-sweep {
+  0%, 55% { left: -80%; }
+  85%, 100% { left: 140%; }
+}
+
+/* ── Speaking pulse ring ── */
+@keyframes speaking-pulse {
+  from { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  to { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+}
+.speaking-ring { animation: speaking-pulse 1.6s ease-out infinite; }
+
+/* ── Radar ripple (waiting states) ── */
+@keyframes radar {
+  from { transform: scale(0.6); opacity: 0.7; }
+  to { transform: scale(1.8); opacity: 0; }
+}
+.radar-dot { animation: radar 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.radar-dot-delayed { animation-delay: 1.2s; }
+
+/* ── Gentle float ── */
+@keyframes float-y {
+  from { transform: translateY(0); }
+  to { transform: translateY(-9px); }
+}
+.float-slow { animation: float-y 5s ease-in-out infinite alternate; }
+
+/* ── Recording dot blink ── */
+@keyframes rec-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.rec-blink { animation: rec-blink 1.2s ease-in-out infinite; }
+
+/* ── Equalizer bars (live preview mockup) ── */
+@keyframes eq-bar {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.eq-bar { transform-origin: bottom; animation: eq-bar 1.1s ease-in-out infinite; }
+
+/* ── Subtle grid pattern ── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, black 30%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, black 30%, transparent 78%);
+}
+
 @media (max-width: 1023px) {
   .hero-orbit,
-  .hero-orbit-delayed {
-    left: 30%;
-    opacity: 0.55;
+  .hero-orbit-delayed,
+  .aurora {
+    opacity: 0.6;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-orbit,
-  .hero-orbit-delayed {
+  .hero-orbit-delayed,
+  .aurora,
+  .aurora-delayed,
+  .cta-shine::after,
+  .speaking-ring,
+  .radar-dot,
+  .radar-dot-delayed,
+  .float-slow,
+  .rec-blink,
+  .eq-bar,
+  .hero-gradient-text {
     animation: none;
   }
-
   .feature-card {
     transition: none;
   }

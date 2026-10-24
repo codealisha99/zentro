@@ -2,7 +2,7 @@
 
 import type { ConnectionState } from '@/lib/types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, WifiOff } from 'lucide-react'
+import { Loader2, WifiOff, Wifi } from 'lucide-react'
 
 type Props = {
   state: ConnectionState
@@ -13,21 +13,30 @@ export function ConnectionBanner({ state }: Props) {
 
   if (state === 'connecting') {
     content = {
-      message: 'Connecting to peer...',
-      color: 'bg-amber-500/20 text-amber-500 border-amber-500/30',
-      icon: <Loader2 className="w-4 h-4 animate-spin" />
+      message: 'Connecting to peer…',
+      color: 'rgba(251,191,36,0.14)',
+      border: 'rgba(251,191,36,0.32)',
+      text: '#fbbf24',
+      spin: true,
+      icon: <Loader2 className="w-3.5 h-3.5 animate-spin" />,
     }
   } else if (state === 'reconnecting') {
     content = {
-      message: 'Connection degraded, reconnecting...',
-      color: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-      icon: <Loader2 className="w-4 h-4 animate-spin" />
+      message: 'Connection degraded, reconnecting…',
+      color: 'rgba(251,146,60,0.14)',
+      border: 'rgba(251,146,60,0.32)',
+      text: '#fb923c',
+      spin: true,
+      icon: <Wifi className="w-3.5 h-3.5" />,
     }
   } else if (state === 'failed') {
     content = {
       message: 'Call ended — connection lost',
-      color: 'bg-red-500/20 text-red-500 border-red-500/30',
-      icon: <WifiOff className="w-4 h-4" />
+      color: 'rgba(240,71,95,0.14)',
+      border: 'rgba(240,71,95,0.32)',
+      text: 'var(--danger-bright)',
+      spin: false,
+      icon: <WifiOff className="w-3.5 h-3.5" />,
     }
   }
 
@@ -35,12 +44,21 @@ export function ConnectionBanner({ state }: Props) {
     <AnimatePresence>
       {content && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full flex justify-center py-4 absolute top-0 z-50 pointer-events-none"
+          exit={{ opacity: 0, scale: 0.96 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="absolute top-0 left-0 right-0 z-40 flex justify-center pt-4"
         >
-          <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium border backdrop-blur-md shadow-lg ${content.color}`}>
+          <div
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium backdrop-blur-md"
+            style={{
+              background: content.color,
+              border: `1px solid ${content.border}`,
+              color: content.text,
+              boxShadow: 'var(--shadow-md)',
+            }}
+          >
             {content.icon}
             {content.message}
           </div>
