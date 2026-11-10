@@ -37,7 +37,7 @@ export function Transcript({ segments, currentTime = 0, isLoading = false }: Pro
   return (
     <div
       className="overflow-y-auto max-h-44 rounded-[var(--radius-md)] p-3.5 space-y-1.5"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}
+      style={{ background: 'rgba(244,241,232,0.03)', border: '1px solid var(--border)' }}
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-1" style={{ color: 'var(--text-muted)' }}>
         Transcript

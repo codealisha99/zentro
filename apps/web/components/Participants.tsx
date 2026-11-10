@@ -26,12 +26,12 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-/* Deterministic pastel gradient per name so avatars feel branded, not random */
+/* Deterministic neutral gradient per name — paper, not random color */
 const AVATAR_GRADIENTS = [
-  'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(226,180,255,0.14))',
-  'linear-gradient(135deg, rgba(52,211,153,0.28), rgba(124,92,252,0.1))',
-  'linear-gradient(135deg, rgba(251,191,36,0.26), rgba(124,92,252,0.1))',
-  'linear-gradient(135deg, rgba(240,71,95,0.24), rgba(251,191,36,0.1))',
+  'linear-gradient(135deg, rgba(244,241,232,0.16), rgba(244,241,232,0.05))',
+  'linear-gradient(135deg, rgba(0,220,130,0.18), rgba(244,241,232,0.04))',
+  'linear-gradient(135deg, rgba(244,241,232,0.12), rgba(0,220,130,0.04))',
+  'linear-gradient(135deg, rgba(245,165,36,0.14), rgba(244,241,232,0.04))',
 ]
 
 function pickGradient(seed: string): string {
@@ -64,7 +64,7 @@ function ParticipantRow({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] transition-colors hover:bg-[rgba(255,255,255,0.04)]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] transition-colors hover:bg-[rgba(244,241,232,0.04)]"
     >
       {/* Avatar */}
       <div className="relative shrink-0">
@@ -72,8 +72,8 @@ function ParticipantRow({
           className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
           style={{
             background: pickGradient(name) || 'var(--accent-soft)',
-            color: isConnecting ? 'var(--text-muted)' : '#d9ccff',
-            border: '1px solid rgba(155,123,255,0.22)',
+            color: isConnecting ? 'var(--text-muted)' : 'var(--paper)',
+            border: '1px solid var(--border-bright)',
           }}
         >
           {initials || '?'}
@@ -144,7 +144,7 @@ export function Participants({
     <div
       className="w-full lg:w-72 backdrop-blur-xl flex flex-col overflow-hidden shrink-0 max-md:h-full lg:max-h-none"
       style={{
-        background: 'rgba(18,20,31,0.96)',
+        background: 'rgba(17,19,22,0.96)',
         border: '1px solid var(--border)',
       }}
     >
@@ -206,7 +206,7 @@ export function Participants({
           >
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center"
-              style={{ background: 'var(--accent-soft)', border: '1px solid rgba(155,123,255,0.2)' }}
+              style={{ background: 'var(--accent-soft)', border: '1px solid rgba(0,220,130,0.22)' }}
             >
               <Users className="w-5 h-5" style={{ color: 'var(--accent-bright)' }} />
             </div>

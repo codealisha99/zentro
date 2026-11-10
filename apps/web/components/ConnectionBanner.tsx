@@ -32,8 +32,8 @@ export function ConnectionBanner({ state }: Props) {
   } else if (state === 'failed') {
     content = {
       message: 'Call ended — connection lost',
-      color: 'rgba(240,71,95,0.14)',
-      border: 'rgba(240,71,95,0.32)',
+      color: 'rgba(229,72,77,0.14)',
+      border: 'rgba(229,72,77,0.32)',
       text: 'var(--danger-bright)',
       spin: false,
       icon: <WifiOff className="w-3.5 h-3.5" />,

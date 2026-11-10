@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Type wiring (fonts arrive as vars on <body> from layout.tsx) ── */
+body {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display { font-family: var(--font-sora), var(--font-inter), ui-sans-serif, system-ui, sans-serif; }
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, 'SF Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
@@ -14,43 +26,45 @@ section[id] {
 }
 
 :root {
-  --bg: #0a0a10;
-  --bg-elevated: #0e0e16;
-  --surface: #12141f;
-  --surface-raised: #191c2b;
-  --surface-hover: #1f2335;
+  --bg: #0b0c0e;
+  --bg-elevated: #0e0f11;
+  --surface: #111316;
+  --surface-raised: #181b1f;
+  --surface-hover: #1e2126;
 
-  --border: rgba(255, 255, 255, 0.08);
-  --border-bright: rgba(255, 255, 255, 0.16);
+  --border: rgba(244, 241, 232, 0.08);
+  --border-bright: rgba(244, 241, 232, 0.16);
 
-  --accent: #7c5cfc;
-  --accent-bright: #9b7bff;
-  --accent-deep: #6446e8;
-  --accent-glow: rgba(124, 92, 252, 0.4);
-  --accent-soft: rgba(124, 92, 252, 0.14);
+  --accent: #00dc82;
+  --accent-bright: #41f29b;
+  --accent-deep: #00b569;
+  --accent-glow: rgba(0, 220, 130, 0.35);
+  --accent-soft: rgba(0, 220, 130, 0.12);
 
-  --danger: #f0475f;
-  --danger-bright: #ff6b80;
-  --danger-glow: rgba(240, 71, 95, 0.35);
-  --success: #34d399;
-  --warning: #fbbf24;
+  --danger: #e5484d;
+  --danger-bright: #ff6169;
+  --danger-glow: rgba(229, 72, 77, 0.35);
+  --success: #00dc82;
+  --warning: #f5a524;
 
-  --text-primary: #f2f2fa;
-  --text-secondary: rgba(242, 242, 250, 0.64);
-  --text-muted: rgba(242, 242, 250, 0.38);
+  --paper: #f4f1e8;
+  --ink: #0b0c0e;
+  --text-primary: #f4f1e8;
+  --text-secondary: rgba(244, 241, 232, 0.62);
+  --text-muted: rgba(244, 241, 232, 0.4);
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 
-  --ring: rgba(155, 123, 255, 0.55);
-  --ring-offset: #0a0a10;
+  --ring: rgba(0, 220, 130, 0.55);
+  --ring-offset: #0b0c0e;
 
-  --shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 40px -8px rgba(0, 0, 0, 0.5), 0 4px 12px -4px rgba(0, 0, 0, 0.35);
-  --shadow-xl: 0 24px 64px -12px rgba(0, 0, 0, 0.55), 0 8px 24px -8px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 0 1px rgba(124, 92, 252, 0.06), 0 8px 40px -6px rgba(124, 92, 252, 0.22);
+  --shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.45), 0 2px 6px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 24px 64px -12px rgba(0, 0, 0, 0.6), 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 0 1px rgba(0, 220, 130, 0.08), 0 8px 40px -6px rgba(0, 220, 130, 0.18);
 }
 
 /* ── Global focus ring — keyboard users always see where they are ── */
@@ -80,15 +94,15 @@ body::before {
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(244, 241, 232, 0.12);
   border-radius: 8px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.22); }
-* { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.14) transparent; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(244, 241, 232, 0.22); }
+* { scrollbar-width: thin; scrollbar-color: rgba(244, 241, 232, 0.14) transparent; }
 
-/* ── Gradient border (1px, masked) ── */
+/* ── Hairline border (1px, masked) ── */
 .gradient-border {
   position: relative;
 }
@@ -100,9 +114,9 @@ body::before {
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(155, 123, 255, 0.5),
-    rgba(255, 255, 255, 0.1) 42%,
-    rgba(155, 123, 255, 0.2)
+    rgba(244, 241, 232, 0.22),
+    rgba(244, 241, 232, 0.06) 42%,
+    rgba(0, 220, 130, 0.25)
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -113,9 +127,9 @@ body::before {
   z-index: 1;
 }
 
-/* ── Hero accent text ── */
+/* ── Hero accent text: paper → signal green ── */
 .hero-gradient-text {
-  background: linear-gradient(100deg, #d0c4ff 0%, #9b7bff 40%, #e2b4ff 75%, #9b7bff 100%);
+  background: linear-gradient(100deg, #f4f1e8 0%, #41f29b 45%, #d4ffe9 75%, #41f29b 100%);
   background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -128,32 +142,13 @@ body::before {
   to { background-position: 100% 50%; }
 }
 
-/* ── Aurora blob drift (landing background) ── */
-.aurora {
-  transform-origin: center;
-  animation: aurora-drift 26s ease-in-out infinite alternate;
-  will-change: transform;
+/* ── Schematic dash-draw (hero line) ── */
+.draw-line {
+  stroke-dasharray: 6 8;
+  animation: dash-move 1.2s linear infinite;
 }
-.aurora-delayed { animation-delay: -13s; animation-duration: 32s; }
-
-@keyframes aurora-drift {
-  from { transform: translate(0, 0) rotate(-6deg) scale(1); }
-  50%  { transform: translate(3%, -2%) rotate(4deg) scale(1.06); }
-  to   { transform: translate(-2%, 3%) rotate(8deg) scale(0.97); }
-}
-
-/* ── Hero orbit rings ── */
-.hero-orbit {
-  transform-origin: center;
-  animation: orbit-drift 24s ease-in-out infinite alternate;
-}
-.hero-orbit-delayed {
-  animation-delay: -12s;
-  animation-duration: 30s;
-}
-@keyframes orbit-drift {
-  from { transform: rotate(-8deg) scale(0.97); }
-  to { transform: rotate(8deg) scale(1.03); }
+@keyframes dash-move {
+  to { stroke-dashoffset: -14; }
 }
 
 /* ── Feature cards ── */
@@ -165,12 +160,12 @@ body::before {
     transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .feature-card:hover {
-  border-color: rgba(155, 123, 255, 0.28);
-  background: rgba(25, 28, 43, 0.85);
-  box-shadow: 0 12px 32px -12px rgba(124, 92, 252, 0.18);
+  border-color: rgba(244, 241, 232, 0.2);
+  background: rgba(24, 27, 31, 0.85);
+  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Primary CTA shine sweep ── */
+/* ── Primary CTA shine sweep (paper button) ── */
 .cta-shine {
   position: relative;
   overflow: hidden;
@@ -186,7 +181,7 @@ body::before {
   background: linear-gradient(
     100deg,
     transparent 20%,
-    rgba(255, 255, 255, 0.22) 50%,
+    rgba(11, 12, 14, 0.16) 50%,
     transparent 80%
   );
   transform: skewX(-18deg);
@@ -198,10 +193,10 @@ body::before {
   85%, 100% { left: 140%; }
 }
 
-/* ── Speaking pulse ring ── */
+/* ── Speaking pulse ring (signal green) ── */
 @keyframes speaking-pulse {
-  from { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
-  to { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+  from { box-shadow: 0 0 0 0 rgba(0, 220, 130, 0.5); }
+  to { box-shadow: 0 0 0 10px rgba(0, 220, 130, 0); }
 }
 .speaking-ring { animation: speaking-pulse 1.6s ease-out infinite; }
 
@@ -234,29 +229,24 @@ body::before {
 }
 .eq-bar { transform-origin: bottom; animation: eq-bar 1.1s ease-in-out infinite; }
 
-/* ── Subtle grid pattern ── */
+/* ── Blueprint grid pattern (hairline, technical) ── */
 .bg-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(244, 241, 232, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 241, 232, 0.03) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, black 30%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, black 30%, transparent 78%);
 }
 
 @media (max-width: 1023px) {
-  .hero-orbit,
-  .hero-orbit-delayed,
-  .aurora {
-    opacity: 0.6;
+  .float-slow {
+    opacity: 0.8;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-orbit,
-  .hero-orbit-delayed,
-  .aurora,
-  .aurora-delayed,
+  .draw-line,
   .cta-shine::after,
   .speaking-ring,
   .radar-dot,
@@ -264,10 +254,20 @@ body::before {
   .float-slow,
   .rec-blink,
   .eq-bar,
+  .dash-flow,
   .hero-gradient-text {
     animation: none;
   }
   .feature-card {
     transition: none;
   }
+}
+
+/* ── P2P diagram flowing dashes ── */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -64; }
+}
+.dash-flow {
+  stroke-dasharray: 7 9;
+  animation: dash-flow 1.6s linear infinite;
 }

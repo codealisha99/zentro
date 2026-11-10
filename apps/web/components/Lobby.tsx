@@ -17,13 +17,6 @@ type Props = {
 
 const STORAGE_KEY = 'zentro-display-name'
 
-function getTimeGreeting(): string {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 export function Lobby({
   roomId,
   localStream,
@@ -42,7 +35,8 @@ export function Lobby({
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) setName(saved)
-    setGreeting(getTimeGreeting())
+    const h = new Date().getHours()
+    setGreeting(h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')
   }, [])
 
   useEffect(() => {
@@ -76,39 +70,37 @@ export function Lobby({
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center p-6 selection:bg-[var(--accent-soft)] overflow-hidden" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden selection:bg-[var(--accent-soft)]" style={{ background: 'var(--bg)' }}>
       <BackgroundVignette />
 
-      {/* Ambient aurora */}
+      {/* Blueprint grid */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="bg-grid absolute inset-0" />
-        <div
-          className="aurora absolute left-1/2 -translate-x-1/2 -top-52 h-[480px] w-[720px] rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, rgba(124,92,252,0.12) 0%, transparent 65%)' }}
-        />
       </div>
 
-      {/* Logo */}
+      {/* Top bar */}
       <div className="relative z-10 w-full max-w-5xl mb-10 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div
             className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)]"
-            style={{
-              background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(124,92,252,0.08))',
-              border: '1px solid rgba(155,123,255,0.35)',
-              boxShadow: '0 0 18px -4px rgba(124,92,252,0.35)',
-            }}
+            style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-bright)' }}
           >
             <Video className="w-4 h-4" style={{ color: 'var(--accent-bright)' }} />
           </div>
-          <span className="text-[15px] font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          <span className="font-display text-[15px] font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
             zentro
+          </span>
+          <span className="mono-label text-[9px] hidden sm:inline" style={{ color: 'var(--text-muted)' }}>
+            — direct line
           </span>
         </div>
         {name.trim() && (
-          <span className="text-xs hidden sm:flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--success)' }} />
-            Signed in as <span style={{ color: 'var(--text-secondary)' }}>{name.trim()}</span>
+          <span
+            className="mono-label text-[9px] hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full"
+            style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-bright)', color: 'var(--text-muted)' }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+            Showing up as <span style={{ color: 'var(--text-primary)' }}>{name.trim()}</span>
           </span>
         )}
       </div>
@@ -127,6 +119,16 @@ export function Lobby({
             className="gradient-border relative w-full aspect-video overflow-hidden rounded-[var(--radius-xl)]"
             style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-xl)' }}
           >
+            {/* corner ticks */}
+            <span
+              className="absolute top-2 left-2 w-3 h-3 border-t border-l pointer-events-none"
+              style={{ borderColor: 'rgba(244,241,232,0.3)' }}
+            />
+            <span
+              className="absolute bottom-2 right-2 w-3 h-3 border-b border-r pointer-events-none"
+              style={{ borderColor: 'rgba(244,241,232,0.3)' }}
+            />
+
             {localStream && !videoMuted ? (
               <video
                 ref={videoRef}
@@ -139,10 +141,11 @@ export function Lobby({
               <div className="w-full h-full flex flex-col items-center justify-center gap-3" style={{ background: 'var(--surface)' }}>
                 {initials ? (
                   <div
-                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold shadow-lg"
+                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(124,92,252,0.85), rgba(226,180,255,0.35))',
-                      color: '#fff',
+                      background: 'linear-gradient(135deg, rgba(244,241,232,0.12), rgba(244,241,232,0.04))',
+                      color: 'var(--paper)',
+                      border: '1px solid var(--border-bright)',
                     }}
                   >
                     {initials}
@@ -157,11 +160,11 @@ export function Lobby({
                 )}
                 {videoMuted && (
                   <span
-                    className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full"
-                    style={{ background: 'rgba(240,71,95,0.1)', color: 'var(--danger-bright)' }}
+                    className="flex items-center gap-1.5 mono-label text-[9px] px-2.5 py-1 rounded-full"
+                    style={{ background: 'rgba(229,72,77,0.12)', color: 'var(--danger-bright)', border: '1px solid rgba(229,72,77,0.3)' }}
                   >
                     <VideoOff className="w-3 h-3" />
-                    Camera off
+                    CAM OFF
                   </span>
                 )}
               </div>
@@ -169,11 +172,12 @@ export function Lobby({
 
             {name.trim() && (
               <div
-                className="absolute bottom-3 left-3 text-white text-xs font-medium px-2.5 py-1.5 rounded-[var(--radius-sm)] flex items-center gap-1.5"
+                className="absolute bottom-3 left-3 text-xs font-medium px-2.5 py-1.5 rounded-[var(--radius-sm)] flex items-center gap-1.5"
                 style={{
-                  background: 'rgba(10,10,16,0.75)',
+                  background: 'rgba(11,12,14,0.78)',
                   backdropFilter: 'blur(12px)',
                   border: '1px solid var(--border-bright)',
+                  color: 'var(--text-primary)',
                 }}
               >
                 {name.trim()}
@@ -183,29 +187,29 @@ export function Lobby({
 
             {audioMuted ? (
               <div
-                className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-[var(--radius-sm)] text-xs font-medium"
+                className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-[var(--radius-sm)] mono-label text-[9px]"
                 style={{
-                  background: 'rgba(240,71,95,0.14)',
+                  background: 'rgba(11,12,14,0.78)',
                   backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(240,71,95,0.3)',
+                  border: '1px solid rgba(229,72,77,0.3)',
                   color: 'var(--danger-bright)',
                 }}
               >
                 <MicOff className="w-3.5 h-3.5" />
-                Muted
+                MUTED
               </div>
             ) : localStream ? (
               <div
-                className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-[var(--radius-sm)] text-[10px] font-semibold tracking-wide uppercase"
+                className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-[var(--radius-sm)] mono-label text-[9px]"
                 style={{
-                  background: 'rgba(52,211,153,0.12)',
+                  background: 'rgba(11,12,14,0.78)',
                   backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(52,211,153,0.25)',
-                  color: 'var(--success)',
+                  border: '1px solid rgba(0,220,130,0.28)',
+                  color: 'var(--accent-bright)',
                 }}
               >
-                <span className="w-1.5 h-1.5 rounded-full rec-blink" style={{ background: 'var(--success)' }} />
-                Camera live
+                <span className="w-1.5 h-1.5 rounded-full rec-blink" style={{ background: 'var(--accent)' }} />
+                CAMERA LIVE
               </div>
             ) : null}
           </div>
@@ -217,7 +221,7 @@ export function Lobby({
               muted={audioMuted}
               label={audioMuted ? 'Unmute microphone' : 'Mute microphone'}
               icon={audioMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              badge={audioMuted ? 'Mic off' : 'Mic on'}
+              badge={audioMuted ? 'Muted' : 'Mic on'}
             />
             <TogglePill
               onClick={onToggleVideo}
@@ -235,41 +239,30 @@ export function Lobby({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
           className="gradient-border flex flex-col gap-7 w-full max-w-xs p-7 rounded-[var(--radius-lg)]"
-          style={{ background: 'rgba(18,20,31,0.92)', backdropFilter: 'blur(20px)', boxShadow: 'var(--shadow-xl)' }}
+          style={{ background: 'var(--bg-elevated)', backdropFilter: 'blur(20px)', boxShadow: 'var(--shadow-xl)' }}
         >
           <div>
-            <p className="text-sm mb-1.5 flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <p className="mono-label text-[9px] mb-1.5" style={{ color: 'var(--text-muted)' }}>
               {greeting}
-              <span aria-hidden="true">👋</span>
             </p>
-            <h1
-              className="text-[1.7rem] font-bold mb-2 tracking-tight leading-tight"
-              style={{ color: 'var(--text-primary)' }}
-            >
+            <h1 className="font-display text-[1.7rem] font-bold mb-2 tracking-tight leading-tight" style={{ color: 'var(--text-primary)' }}>
               Ready to join?
             </h1>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Enter your name so others know who you are.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="display-name"
-                className="block text-[10px] font-semibold mb-2 uppercase tracking-[0.15em]"
-                style={{ color: 'var(--text-muted)' }}
-              >
+              <label htmlFor="display-name" className="mono-label block text-[9px] mb-2" style={{ color: 'var(--text-muted)' }}>
                 Your name
               </label>
               <div
                 className="flex items-center gap-2.5 px-3.5 py-3 rounded-[var(--radius-md)] transition-all focus-within:shadow-[0_0_0_3px_var(--accent-soft)]"
-                style={{
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border)',
-                }}
+                style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)' }}
               >
-                <User className="w-4 h-4 shrink-0 transition-colors" style={{ color: 'var(--text-muted)' }} />
+                <User className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
                 <input
                   id="display-name"
                   value={name}
@@ -279,7 +272,7 @@ export function Lobby({
                   autoFocus
                   maxLength={40}
                   autoComplete="name"
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-[rgba(242,242,250,0.28)]"
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-[rgba(244,241,232,0.26)]"
                   style={{ color: 'var(--text-primary)', caretColor: 'var(--accent-bright)' }}
                 />
               </div>
@@ -290,16 +283,13 @@ export function Lobby({
               whileTap={name.trim() && !isJoining ? { scale: 0.97 } : {}}
               onClick={handleJoin}
               disabled={!name.trim() || isJoining}
-              className="cta-shine w-full py-3.5 font-semibold text-white text-sm transition-all rounded-[var(--radius-md)] flex items-center justify-center gap-2 disabled:opacity-35 disabled:cursor-not-allowed"
-              style={{
-                background: 'var(--accent)',
-                boxShadow: '0 0 28px -6px var(--accent-glow)',
-              }}
+              className="cta-shine w-full py-3.5 font-semibold text-sm transition-all rounded-[var(--radius-md)] flex items-center justify-center gap-2 disabled:opacity-35 disabled:cursor-not-allowed"
+              style={{ background: 'var(--paper)', color: 'var(--ink)' }}
               onMouseEnter={(e) => {
-                if (!isJoining) e.currentTarget.style.background = 'var(--accent-bright)'
+                if (!isJoining) { e.currentTarget.style.background = 'var(--accent-bright)'; e.currentTarget.style.color = 'var(--ink)' }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--accent)'
+                e.currentTarget.style.background = 'var(--paper)'
               }}
             >
               {isJoining ? (
@@ -316,11 +306,11 @@ export function Lobby({
           </div>
 
           <div className="space-y-3 pt-1">
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span style={{ color: 'var(--text-muted)' }}>Meeting ID</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="mono-label text-[9px]" style={{ color: 'var(--text-muted)' }}>Meeting ID</span>
               <span
-                className="font-mono px-2 py-0.5 rounded-md"
-                style={{ color: 'var(--text-secondary)', background: 'var(--accent-soft)' }}
+                className="font-mono text-xs px-2 py-0.5 rounded-md"
+                style={{ color: 'var(--text-secondary)', background: 'var(--surface-hover)' }}
               >
                 {roomId.slice(0, 8)}…
               </span>
@@ -332,18 +322,18 @@ export function Lobby({
               }`}
               style={
                 copied
-                  ? { background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.28)', color: 'var(--success)' }
-                  : { background: 'var(--surface-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }
+                  ? { background: 'var(--accent-soft)', border: '1px solid rgba(0,220,130,0.3)', color: 'var(--accent-bright)' }
+                  : { background: 'var(--surface-raised)', border: '1px solid var(--border-bright)', color: 'var(--text-secondary)' }
               }
               onMouseEnter={(e) => {
                 if (!copied) {
-                  e.currentTarget.style.borderColor = 'var(--border-bright)'
+                  e.currentTarget.style.borderColor = 'rgba(244,241,232,0.3)'
                   e.currentTarget.style.color = 'var(--text-primary)'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!copied) {
-                  e.currentTarget.style.borderColor = 'var(--border)'
+                  e.currentTarget.style.borderColor = 'var(--border-bright)'
                   e.currentTarget.style.color = 'var(--text-secondary)'
                 }
               }}
@@ -356,7 +346,7 @@ export function Lobby({
       </div>
 
       {/* Footer note */}
-      <p className="relative z-10 mt-10 text-[11px] flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+      <p className="relative z-10 mt-10 mono-label text-[9px] flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
         <Camera className="w-3 h-3" aria-hidden="true" />
         Your camera only turns on in the meeting — nothing is recorded here
       </p>
@@ -385,16 +375,14 @@ function TogglePill({
       className="group relative flex items-center gap-2.5 pl-3.5 pr-2 py-2 rounded-full transition-all"
       style={
         muted
-          ? { background: 'rgba(240,71,95,0.1)', border: '1px solid rgba(240,71,95,0.3)' }
+          ? { background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.3)' }
           : { background: 'var(--surface-raised)', border: '1px solid var(--border-bright)', boxShadow: 'var(--shadow-md)' }
       }
       title={label}
       aria-label={label}
       aria-pressed={!muted}
     >
-      <span
-        className={muted ? 'text-[var(--danger-bright)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors'}
-      >
+      <span className={muted ? 'text-[var(--danger-bright)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors'}>
         {icon}
       </span>
       <span
@@ -402,7 +390,7 @@ function TogglePill({
         style={
           muted
             ? { color: 'var(--danger-bright)', background: 'transparent' }
-            : { color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)' }
+            : { color: 'var(--text-secondary)', background: 'rgba(244,241,232,0.05)' }
         }
       >
         {badge}

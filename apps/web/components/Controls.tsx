@@ -53,9 +53,9 @@ export function Controls({
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="gradient-border flex items-center gap-1.5 px-4 py-2.5 rounded-[var(--radius-lg)]"
+        className="gradient-border flex items-center gap-1.5 px-4 py-2.5 rounded-[var(--radius-lg)] max-[420px]:gap-0.5 max-[420px]:px-2.5"
         style={{
-          background: 'rgba(18,20,31,0.88)',
+          background: 'rgba(17,19,22,0.9)',
           backdropFilter: 'blur(24px) saturate(1.35)',
           boxShadow: 'var(--shadow-lg)',
         }}
@@ -65,7 +65,7 @@ export function Controls({
           onClick={onToggleAudio}
           disabled={disabled}
           active={!audioMuted}
-          label={audioMuted ? 'Unmute' : 'Mute'}
+          label={audioMuted ? 'Unmute (M)' : 'Mute (M)'}
           icon={audioMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           danger={audioMuted}
         />
@@ -73,7 +73,7 @@ export function Controls({
           onClick={onToggleVideo}
           disabled={disabled}
           active={!videoMuted && !isScreenSharing}
-          label={videoMuted ? 'Camera on' : 'Camera off'}
+          label={videoMuted ? 'Camera on (V)' : 'Camera off (V)'}
           icon={videoMuted ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
           danger={videoMuted && !isScreenSharing}
         />
@@ -93,7 +93,7 @@ export function Controls({
           onClick={onToggleChat}
           disabled={disabled}
           active={chatOpen}
-          label="Chat"
+          label="Chat (C)"
           icon={<MessageSquare className="w-5 h-5" />}
           accent={chatOpen}
         />
@@ -106,9 +106,11 @@ export function Controls({
             <div className="relative">
               <Users className="w-5 h-5" />
               <span
-                className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full text-[9px] flex items-center justify-center text-white font-bold px-0.5"
+                className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full text-[9px] flex items-center justify-center font-bold px-0.5"
                 style={{
-                  background: participantsOpen ? 'var(--accent-deep)' : 'var(--accent)',
+                  background: participantsOpen ? 'rgba(11,12,14,0.9)' : 'var(--accent)',
+                  border: `1px solid ${participantsOpen ? 'var(--accent)' : 'transparent'}`,
+                  color: 'var(--accent-bright)',
                   boxShadow: '0 0 8px -1px var(--accent-glow)',
                 }}
               >
@@ -155,7 +157,7 @@ export function Controls({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.93 }}
           onClick={onEndCall}
-          className="flex items-center justify-center w-11 h-11 text-white rounded-[var(--radius-md)]"
+          className="flex items-center justify-center w-11 h-11 text-white rounded-[var(--radius-md)] max-[420px]:w-10 max-[420px]:h-10"
           style={{
             background: 'var(--danger)',
             boxShadow: '0 0 22px -5px var(--danger-glow)',
@@ -175,7 +177,7 @@ export function Controls({
 function Divider() {
   return (
     <div
-      className="w-px h-5 mx-1.5 shrink-0"
+      className="w-px h-5 mx-1.5 shrink-0 max-[420px]:hidden"
       style={{
         background: 'linear-gradient(to bottom, transparent, var(--border-bright), transparent)',
       }}
@@ -222,7 +224,7 @@ function ControlButton({
     if (accent) {
       return {
         background: 'var(--accent-soft)',
-        border: '1px solid rgba(155,123,255,0.32)',
+        border: '1px solid rgba(0,220,130,0.32)',
         color: 'var(--accent-bright)',
       }
     }
@@ -239,7 +241,7 @@ function ControlButton({
         whileTap={{ scale: 0.92 }}
         onClick={onClick}
         disabled={disabled}
-        className="relative flex items-center justify-center w-11 h-11 rounded-[var(--radius-md)] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="relative flex items-center justify-center w-11 h-11 rounded-[var(--radius-md)] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed max-[420px]:w-10 max-[420px]:h-10"
         style={getStyle()}
         onMouseEnter={(e) => {
           if (disabled || variant !== 'default' || danger || accent) return
@@ -262,7 +264,7 @@ function ControlButton({
         role="tooltip"
         className="absolute -top-9 opacity-0 translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150 text-[11px] font-medium px-2.5 py-1.5 rounded-md whitespace-nowrap pointer-events-none z-50"
         style={{
-          background: 'rgba(30,33,48,0.98)',
+          background: 'rgba(24,27,31,0.98)',
           border: '1px solid var(--border-bright)',
           color: 'var(--text-primary)',
           boxShadow: 'var(--shadow-md)',
